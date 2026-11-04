@@ -41,6 +41,7 @@ python3 -m venv .venv          # no Ubuntu/Debian, pode exigir: sudo apt install
 - `explorar.py`: baixa o mês mais recente do estado e conta os registros da capital por tipo.
 - `baixar.py`: baixa todos os meses, filtra a capital e salva um CSV por mês em `dados/brutos/`. Baixar de novo um mês substitui a versão anterior, o que permite refazer a janela de revisão.
 - `sazonalidade.py`: junta os meses, filtra de 2019 em diante sem notificações e imprime a tabela de sinistros por dia, com anos nas linhas e meses nas colunas.
+- `cobertura.py`: auditoria do peso das notificações, usando a base inteira. Mostra o % por tipo e por ano, o % de notificações mês a mês em 2025 e 2026, e as notificações por dia.
 
 ## Estrutura do curso
 
@@ -111,9 +112,16 @@ Resultados da sessão de 4 de novembro de 2026:
 
 Ambiente recriado em 4 de novembro de 2026 em outro computador (Python 3.14, pandas 3.1.1). O código do projeto funciona nessa versão.
 
+Cobertura por ano, parte das notificações, com o `cobertura.py`:
+- Decisão: a auditoria usa a base inteira (2015 em diante). Os 0% de notificações de 2015 a 2018 são, eles mesmos, o achado.
+- A proporção de notificações fica estável entre 33% e 37% de 2019 a 2024, sobe para 38,3% em 2025 e chega a 41,7% em 2026. O palpite do aluno, de que 2026 ficaria mais baixo, estava errado.
+- Mês a mês, a hipótese de que a janela de revisão explica tudo não se sustenta: janeiro a março de 2026 já ficam entre 40% e 42% (contra 36% a 37% em 2025), e julho de 2026 é o mês mais baixo. A alta começa em meados de 2025.
+- Numerador × denominador, de janeiro a setembro, por dia, 2024 → 2026: notificações 43,5 → 50,9 (+17%); sinistros com vítima 82,1 → 71,0 (−13%); total 125,6 → 121,9 (−3%). O total se conserva em parte, o que é compatível com uma migração de "não fatal" para "notificação" (cerca de dois terços da queda), mas não a prova.
+- O aluno de início previu que as notificações por dia subiriam nas duas situações, e foi corrigido: um teste precisa prever resultados diferentes para as hipóteses que compara.
+
 Sequência prevista para o restante do Módulo 3:
-- **Próximo passo:** medir a cobertura por ano: proporção de notificações, coordenadas válidas e hora informada.
-- Separar "sem vítimas" de "vítimas não informadas".
+- **Próximo passo:** pergunta pendente para o aluno: olhando só as colunas de uma notificação com zero vítimas, dá para distinguir "sem vítimas" de "vítimas não informadas"? Isso abre o teste da hipótese de migração.
+- Medir o restante da cobertura por ano: coordenadas válidas e hora informada.
 - Medir a janela de revisão de verdade: baixar o mesmo mês em datas diferentes e comparar.
 - Entrega: um relatório de qualidade dos dados.
 
