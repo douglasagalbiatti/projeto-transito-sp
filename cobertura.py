@@ -44,3 +44,11 @@ cont = notificacoes.groupby(["ano_sinistro", "mes_sinistro"]).size().reset_index
 datas = pd.to_datetime(dict(year=cont["ano_sinistro"], month=cont["mes_sinistro"], day=1))
 cont["por_dia"] = cont["notificacoes"] / datas.dt.days_in_month
 print(cont.pivot(index="ano_sinistro", columns="mes_sinistro", values="por_dia").round(1))
+
+# Tabela 4: % de registros sem nenhuma informação de gravidade (as cinco
+# colunas vazias), por ano e tipo. Nesses casos, não dá para distinguir
+# "sem vítimas" de "vítimas não informadas": NaN é ausência de informação,
+# e não zero.
+gravidade = ["qtd_gravidade_fatal", "qtd_gravidade_grave", "qtd_gravidade_leve", "qtd_gravidade_ileso", "qtd_gravidade_nao_disponivel"]
+df["sem_info"] = df[gravidade].isna().all(axis=1)  # True se as cinco estão vazias
+print((pd.crosstab(df["ano_sinistro"], df["tipo_registro"], values=df["sem_info"], aggfunc="mean") * 100).round(1))  # média de True/False = fração

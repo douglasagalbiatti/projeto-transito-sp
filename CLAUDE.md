@@ -8,6 +8,7 @@ Este repositório é, ao mesmo tempo, um projeto de dados e um curso. O aluno (D
 - **Código é ensinado linha por linha.** Quando o aluno precisa escrever código, mostre poucas linhas por vez e explique o que cada uma faz e cada argumento. O aluno digita, roda e manda a saída.
 - **Peça um palpite antes de cada execução** e compare com o resultado. Isso calibra a intuição sobre os dados.
 - Quando o aluno erra, aponte o erro com clareza e com o motivo, sem elogio vazio. Quando ele está travado de verdade, dê um apoio concreto, como fazer o primeiro passo, e devolva o controle.
+- O aluno é PhD em Física e tem ampla experiência com matemática. Não peça palpites de conta trivial nem justificativas óbvias. Concentre as perguntas no domínio dos dados (como o registro nasce, que vieses isso cria), no pandas e no git. Quando os números forem necessários para uma entrega, explique o motivo, em vez de só cobrar.
 - Teste o código antes de passá-lo ao aluno, de preferência com `.venv/bin/python` em uma cópia fora do repositório.
 - Escreva em português do Brasil.
 
@@ -34,14 +35,14 @@ python3 -m venv .venv          # no Ubuntu/Debian, pode exigir: sudo apt install
   - as notificações quase nunca informam veículos nem vítimas;
   - os meses recentes chegam incompletos e são revisados depois;
   - os óbitos contam até 30 dias após o sinistro;
-  - há também as tabelas `pessoas` e `veiculos`, que ainda não foram usadas.
+  - há também as tabelas `pessoas` (`pessoas-envolvidas-em-sinistros`) e `veiculos` (`veiculos-envolvidos-em-sinistros`), com uma linha por pessoa ou veículo, ligadas pelo `id_sinistro`. Elas ainda não são baixadas pelo projeto, e quase não incluem notificações.
 
 ## Arquivos
 
 - `explorar.py`: baixa o mês mais recente do estado e conta os registros da capital por tipo.
 - `baixar.py`: baixa todos os meses, filtra a capital e salva um CSV por mês em `dados/brutos/`. Baixar de novo um mês substitui a versão anterior, o que permite refazer a janela de revisão.
 - `sazonalidade.py`: junta os meses, filtra de 2019 em diante sem notificações e imprime a tabela de sinistros por dia, com anos nas linhas e meses nas colunas.
-- `cobertura.py`: auditoria do peso das notificações, usando a base inteira. Mostra o % por tipo e por ano, o % de notificações mês a mês em 2025 e 2026, e as notificações por dia.
+- `cobertura.py`: auditoria do peso das notificações, usando a base inteira. Mostra o % por tipo e por ano, o % de notificações mês a mês em 2025 e 2026, as notificações por dia e o % de registros sem nenhuma informação de gravidade.
 
 ## Estrutura do curso
 
@@ -119,9 +120,15 @@ Cobertura por ano, parte das notificações, com o `cobertura.py`:
 - Numerador × denominador, de janeiro a setembro, por dia, 2024 → 2026: notificações 43,5 → 50,9 (+17%); sinistros com vítima 82,1 → 71,0 (−13%); total 125,6 → 121,9 (−3%). O total se conserva em parte, o que é compatível com uma migração de "não fatal" para "notificação" (cerca de dois terços da queda), mas não a prova.
 - O aluno de início previu que as notificações por dia subiriam nas duas situações, e foi corrigido: um teste precisa prever resultados diferentes para as hipóteses que compara.
 
+"Sem vítimas" × "vítimas não informadas" (Tabela 4 do `cobertura.py`):
+- Pontos corrigidos: `qtd_gravidade_nao_disponivel` é a coluna das vítimas não informadas; "sem vítimas" confirmado é fatal = grave = leve = 0 com ileso > 0; 0 (contou zero) não é o mesmo que NaN (não informado); NaN numa tabela de frações pode ser 0 ÷ 0.
+- Cerca de 97% das notificações vêm com as cinco colunas de gravidade vazias, de forma estável de 2019 a 2026. Nos sinistros não fatais, essa fração vai de 0,1% para 0,9% a partir de 2024. As notificações com vítimas feridas ficam em cerca de 3% ao ano, sem tendência.
+- Tabela `pessoas` (conjunto `pessoas-envolvidas-em-sinistros` na mesma API, 141 meses, liga pelo `id_sinistro`): testada só com setembro de 2026, numa pasta temporária. Aparecem nela 100% dos fatais, 99,3% dos não fatais e só 2,4% das notificações (38 de 1.580, todas com pessoas leves, graves ou ilesas).
+- **Conclusão para o relatório:** a alta das notificações (+17%) junto com a queda dos sinistros com vítima (−13%) é compatível com uma migração de categoria, mas não pode ser testada com os dados publicados. Confirmá-la exigiria informação do DETRAN-SP sobre o processo de registro.
+- Pendente (exercício do aluno): acrescentar o item 4 à docstring do `cobertura.py`.
+
 Sequência prevista para o restante do Módulo 3:
-- **Próximo passo:** pergunta pendente para o aluno: olhando só as colunas de uma notificação com zero vítimas, dá para distinguir "sem vítimas" de "vítimas não informadas"? Isso abre o teste da hipótese de migração.
-- Medir o restante da cobertura por ano: coordenadas válidas e hora informada.
+- **Próximo passo:** medir o restante da cobertura por ano: coordenadas válidas e hora informada.
 - Medir a janela de revisão de verdade: baixar o mesmo mês em datas diferentes e comparar.
 - Entrega: um relatório de qualidade dos dados.
 
