@@ -1,0 +1,7 @@
+.venv/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# Dados brutos baixados do Infosiga; são recriados por baixar.py
+dados/
