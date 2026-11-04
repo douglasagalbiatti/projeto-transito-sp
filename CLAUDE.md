@@ -40,7 +40,7 @@ python3 -m venv .venv          # no Ubuntu/Debian, pode exigir: sudo apt install
 
 - `explorar.py`: baixa o mês mais recente do estado e conta os registros da capital por tipo.
 - `baixar.py`: baixa todos os meses, filtra a capital e salva um CSV por mês em `dados/brutos/`. Baixar de novo um mês substitui a versão anterior, o que permite refazer a janela de revisão.
-- `sazonalidade.py`: junta os meses e filtra de 2019 em diante, sem notificações (parte 1 pronta).
+- `sazonalidade.py`: junta os meses, filtra de 2019 em diante sem notificações e imprime a tabela de sinistros por dia, com anos nas linhas e meses nas colunas.
 
 ## Estrutura do curso
 
@@ -98,29 +98,21 @@ Já feito:
 - O aluno entendeu que um ano não basta e que o teste certo compara o mesmo par de meses em vários anos.
 - Ponto corrigido: a variação natural nunca é "confirmada"; é o que sobra quando não aparece um padrão consistente.
 
-Tabela desenhada:
-- Linhas: anos de 2019 a 2026
-- Colunas: meses
-- Célula: sinistros por dia (fatais mais não fatais, sem notificações, divididos pelos dias do mês)
+`sazonalidade.py` concluído: junta e filtra os meses (216.964 linhas: 210.271 não fatais e 6.693 fatais; palpite do aluno: 200 mil) e monta a tabela de anos (2019 a 2026) × meses, com sinistros por dia em cada célula.
 
-`sazonalidade.py` parte 1, já pronta: juntar e filtrar os dados. Deu 216.964 linhas (210.271 não fatais e 6.693 fatais); o palpite do aluno foi 200 mil.
+Resultados da sessão de 4 de novembro de 2026:
+- `len(contagem)` = 93 pares (ano, mês), igual ao palpite (7 × 12 + 9). O aluno entendeu que o `groupby` só cria grupos que existem, e que por isso um mês vazio sumiria sem aviso.
+- Fevereiro de 2019 contra janeiro de 2019: a vantagem de fevereiro vai de 3% nos totais para 15% por dia. O aluno acertou o sentido, mas não estimou o tamanho.
+- O aluno errou o palpite sobre os `NaN` (achou que seriam dias sem sinistro) e, depois de ser corrigido, chegou sozinho aos 3: outubro a dezembro de 2026.
+- Agosto → setembro: setembro cai em 5 de 8 anos (2019 −6,4; 2020 −1,0; 2021 −2,5; 2022 −0,4; 2026 −4,8) e sobe em 3 (2023 +2,9; 2024 +2,2; 2025 +0,6). Conclusão: a sazonalidade perde força.
+- Erro do aluno, corrigido: ele achou que os anos antigos já consolidados excluíam a explicação dos registros não incorporados. Na verdade, ela só vale para setembro de 2026, e a tabela não consegue testá-la.
+- Experimento definido, com apoio, porque o aluno não chegou a ele sozinho: baixar setembro de 2026 de novo e comparar. Se subir bastante (de 71 para perto de 76 ou mais), isso apoia os registros não incorporados; se ficar perto de 71, sobra a variação natural. O aluno entendeu que agosto de 2026 é uma régua melhor que a média de vários anos, por causa da mudança de nível entre anos.
+- **Valor de referência para o experimento:** setembro de 2026 = 71,0 sinistros por dia (cerca de 2.130), com dados baixados em 4 de novembro de 2026.
 
-**Próximo passo:** a parte 2 do `sazonalidade.py`, já ensinada linha por linha mas ainda não digitada pelo aluno:
-
-```python
-contagem = df.groupby(["ano_sinistro", "mes_sinistro"]).size().reset_index(name="sinistros")
-datas = pd.to_datetime(dict(year=contagem["ano_sinistro"], month=contagem["mes_sinistro"], day=1))
-contagem["dias"] = datas.dt.days_in_month
-contagem["por_dia"] = contagem["sinistros"] / contagem["dias"]
-tabela = contagem.pivot(index="ano_sinistro", columns="mes_sinistro", values="por_dia")
-pd.set_option("display.width", 200)
-print(tabela.round(1))
-```
-
-Pergunta pendente para o aluno: em quantos dos 8 anos setembro fica abaixo de agosto, e qual explicação ganha força? Deixe o aluno ler a tabela e concluir; não entregue a resposta.
+Ambiente recriado em 4 de novembro de 2026 em outro computador (Python 3.14, pandas 3.1.1). O código do projeto funciona nessa versão.
 
 Sequência prevista para o restante do Módulo 3:
-- Medir a cobertura por ano: proporção de notificações, coordenadas válidas e hora informada.
+- **Próximo passo:** medir a cobertura por ano: proporção de notificações, coordenadas válidas e hora informada.
 - Separar "sem vítimas" de "vítimas não informadas".
 - Medir a janela de revisão de verdade: baixar o mesmo mês em datas diferentes e comparar.
 - Entrega: um relatório de qualidade dos dados.
