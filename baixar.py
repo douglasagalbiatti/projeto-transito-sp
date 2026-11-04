@@ -15,7 +15,7 @@ def baixar_capital(recurso):
     codigos = pd.to_numeric(df["cod_ibge"], errors="coerce")
     return df[codigos == 3550308]
 
-for recurso in recursos[-3:]:
+for recurso in recursos:
     nome = recurso["url"].split("?")[0].split("/")[-1]
     sp = baixar_capital(recurso)
     sp.to_csv(f"dados/brutos/{nome}", sep=";", index=False)
