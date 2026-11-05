@@ -52,3 +52,34 @@ print(cont.pivot(index="ano_sinistro", columns="mes_sinistro", values="por_dia")
 gravidade = ["qtd_gravidade_fatal", "qtd_gravidade_grave", "qtd_gravidade_leve", "qtd_gravidade_ileso", "qtd_gravidade_nao_disponivel"]
 df["sem_info"] = df[gravidade].isna().all(axis=1)  # True se as cinco estão vazias
 print((pd.crosstab(df["ano_sinistro"], df["tipo_registro"], values=df["sem_info"], aggfunc="mean") * 100).round(1))  # média de True/False = fração
+
+# Tabela 5: % de coordenadas por situação (válida, fora do retângulo do
+# município, zero ou ausente), por ano. As colunas vêm como texto com
+# vírgula decimal e precisam ser convertidas.
+lat = pd.to_numeric(df["latitude"].str.replace(",", "."), errors="coerce")
+lon = pd.to_numeric(df["longitude"].str.replace(",", "."), errors="coerce")
+dentro = lat.between(-24.01, -23.36) & lon.between(-46.83, -46.36)
+df["coord"] = "fora"
+df.loc[dentro, "coord"] = "valida"
+df.loc[lat.isna() | lon.isna(), "coord"] = "ausente"
+df.loc[(lat == 0) | (lon == 0), "coord"] = "zero"
+print((pd.crosstab(df["ano_sinistro"], df["coord"], normalize="index") * 100).round(1))
+
+# Tabela 6: % de coordenadas ausentes mês a mês, de 2024 a 2026, para
+# localizar quando a falta começou e se ela é estável.
+r = df[df["ano_sinistro"] >= 2024]
+ausente = r["coord"] == "ausente"
+print((pd.crosstab([r["ano_sinistro"], r["mes_sinistro"]], ausente, normalize="index")[True] * 100).round(1).unstack())
+
+# Tabela 7: % de coordenadas ausentes por tipo de registro, de 2024 a 2026
+print((pd.crosstab([r["ano_sinistro"], r["tipo_registro"]], ausente, normalize="index")[True] * 100).round(1).unstack())
+
+# Tabela 8: qualidade da hora, por ano e tipo de registro.
+# - ausente: hora não informada;
+# - minuto 00: sinal de hora arredondada. Com anotação exata, ficaria em
+#   torno de 1/60 ≈ 1,7%; bem acima disso, a hora foi estimada.
+minuto = pd.to_numeric(df["hora_sinistro"].str[3:5], errors="coerce")
+df["hora_ausente"] = df["hora_sinistro"].isna()
+df["minuto_00"] = minuto == 0
+hora = df.groupby(["ano_sinistro", "tipo_registro"])[["hora_ausente", "minuto_00"]].mean() * 100
+print(hora.round(1).unstack())

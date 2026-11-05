@@ -42,7 +42,7 @@ python3 -m venv .venv          # no Ubuntu/Debian, pode exigir: sudo apt install
 - `explorar.py`: baixa o mês mais recente do estado e conta os registros da capital por tipo.
 - `baixar.py`: baixa todos os meses, filtra a capital e salva um CSV por mês em `dados/brutos/`. Baixar de novo um mês substitui a versão anterior, o que permite refazer a janela de revisão.
 - `sazonalidade.py`: junta os meses, filtra de 2019 em diante sem notificações e imprime a tabela de sinistros por dia, com anos nas linhas e meses nas colunas.
-- `cobertura.py`: auditoria do peso das notificações, usando a base inteira. Mostra o % por tipo e por ano, o % de notificações mês a mês em 2025 e 2026, as notificações por dia e o % de registros sem nenhuma informação de gravidade.
+- `cobertura.py`: auditoria do peso das notificações, usando a base inteira. Mostra o % por tipo e por ano, o % de notificações mês a mês em 2025 e 2026, as notificações por dia, o % de registros sem nenhuma informação de gravidade, a situação das coordenadas (por ano, por mês e por tipo) e a qualidade da hora (ausente e minuto 00).
 
 ## Estrutura do curso
 
@@ -125,11 +125,25 @@ Cobertura por ano, parte das notificações, com o `cobertura.py`:
 - Cerca de 97% das notificações vêm com as cinco colunas de gravidade vazias, de forma estável de 2019 a 2026. Nos sinistros não fatais, essa fração vai de 0,1% para 0,9% a partir de 2024. As notificações com vítimas feridas ficam em cerca de 3% ao ano, sem tendência.
 - Tabela `pessoas` (conjunto `pessoas-envolvidas-em-sinistros` na mesma API, 141 meses, liga pelo `id_sinistro`): testada só com setembro de 2026, numa pasta temporária. Aparecem nela 100% dos fatais, 99,3% dos não fatais e só 2,4% das notificações (38 de 1.580, todas com pessoas leves, graves ou ilesas).
 - **Conclusão para o relatório:** a alta das notificações (+17%) junto com a queda dos sinistros com vítima (−13%) é compatível com uma migração de categoria, mas não pode ser testada com os dados publicados. Confirmá-la exigiria informação do DETRAN-SP sobre o processo de registro.
-- Pendente (exercício do aluno): acrescentar o item 4 à docstring do `cobertura.py`.
+- Pendente (exercício do aluno): acrescentar os itens 4 a 8 à docstring do `cobertura.py`, que hoje lista só as Tabelas 1 a 3.
+
+Coordenadas (Tabelas 5 a 7 do `cobertura.py`, sessão de 5 de novembro de 2026):
+- Critério: as colunas vêm como texto com vírgula decimal. Classificação: ausente, zero, fora do retângulo do município (latitude de −24,01 a −23,36, longitude de −46,83 a −46,36) ou válida. O aluno de início confundiu formato (vírgula, texto) com validade, e foi corrigido.
+- Limite do retângulo: ele não pega pontos de referência dentro do município. Exemplo: 374 registros com a mesma coordenada no Rodoanel (SP 021, número 5). Sinais de ponto de referência: o mesmo logradouro e número em todos os registros, e o ponto isolado, sem dispersão ao redor. Isso fica para o Módulo 7. O aluno não chegou a esses sinais sozinho.
+- Ausentes: de 0,2% a 0,4% de 2019 a 2024; **44,3% em 2025** e 28,6% em 2026. O salto acontece de uma vez em janeiro de 2025 e se concentra nas notificações (cerca de 90%, contra cerca de 16% nos não fatais). Os fatais têm cerca de 10% de ausência desde 2016, sem relação com a mudança de 2025.
+- Em 2026, as notificações alternam mês a mês entre cerca de 92% (janeiro e abril a junho) e cerca de 15% (fevereiro, março, julho e agosto) de coordenadas ausentes.
+- O tutor propôs a hipótese de geocodificação tardia em lotes, e **o aluno a refutou corretamente**: se fosse isso, os meses de 2025 já teriam sido preenchidos. Conclusão: a diferença nasce na origem, e a causa só o DETRAN-SP poderia confirmar.
+
+Hora (Tabela 8):
+- O critério de precisão é o % de minuto 00, que ficaria em torno de 1/60 ≈ 1,7% com anotação exata.
+- Notificações: cerca de 1,9%. Não fatais: cerca de 2,5%. **Fatais: de 9% a 16%**, com hora ausente de 1% a 7% (só nos fatais, e caindo ao longo dos anos).
+- O palpite do aluno (mais arredondamento nas notificações) estava errado. Ele também confundiu a hora do sinistro com a hora do óbito e foi corrigido: num fatal, a hora do sinistro é reconstruída depois do fato.
+
+**A cobertura por ano está concluída** (notificações, gravidade, coordenadas e hora).
 
 Sequência prevista para o restante do Módulo 3:
-- **Próximo passo:** medir o restante da cobertura por ano: coordenadas válidas e hora informada.
-- Medir a janela de revisão de verdade: baixar o mesmo mês em datas diferentes e comparar.
+- **Próximo passo:** escrever o relatório de qualidade dos dados, com as conclusões registradas acima. Ainda falta decidir o formato com o aluno.
+- Medir a janela de revisão de verdade: baixar o mesmo mês em datas diferentes e comparar. **Antes de rodar o `baixar.py` de novo, copie `dados/brutos/` para uma pasta datada** (por exemplo, `dados/brutos_2026-11-04/`), porque o download substitui os arquivos. Previsões: setembro de 2026 sobe de 71,0 por dia, se houver registros atrasados; os meses de 2026 com cerca de 92% de coordenadas ausentes nas notificações não mudam.
 - Entrega: um relatório de qualidade dos dados.
 
 ## Diferenças esperadas em relação a Bauru
